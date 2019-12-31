@@ -71,6 +71,7 @@ class Configuration:
 
         A value of 0 will disable liveness messages entirely.
         """
+        self.sensors: List[str] = []
 
     @classmethod
     def _parser(cls) -> argparse.ArgumentParser:
@@ -98,6 +99,8 @@ class Configuration:
         parser.add_argument("--alive-interval", type=int,
                             default=Configuration.DEF_ALIVE_INTERVAL,
                             help="Interval for sending liveness messages (seconds; suppress if 0)")
+        parser.add_argument("--sensor", "-s", type=str, action="append",
+                            help="Add a sensor description string to the current configuration")
         return parser
 
     def parse_args(self, filename: str = None):
@@ -127,3 +130,5 @@ class Configuration:
             self.discovery_interval = args.discovery_interval
         if args.alive_interval:
             self.alive_interval = args.alive_interval
+        if args.sensor:
+            self.sensors = args.sensor

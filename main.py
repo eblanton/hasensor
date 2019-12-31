@@ -7,12 +7,16 @@ from hasensor.configuration import Configuration
 from hasensor.loop import Loop
 from hasensor.event import RepeatingEvent, NOW
 
-def send_alive(args: Optional[Tuple[Loop, str]]) -> None:
+from hasensor.registry import register_sensor_type, create_sensor
+from hasensor.sensors.bme280 import BME280Sensor
+from hasensor.sensors.am2320 import AM2320Sensor
+
+
+def send_alive(loop: Optional[Loop]) -> None:
     print("Sending keepalive")
-    if args is None:
+    if loop is None:
         return
-    loop, topic = args
-    loop.publish(topic, "ON")
+    loop.publish("state", "ON")
 
 
 def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
@@ -20,9 +24,9 @@ def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
     prefix = conf.prefix
     if conf.alive_interval != 0:
         alive_prefix = "%s/binary_sensor/%sOnline/config" % (disc_prefix, conf.discovery_node)
-        loop.publish(alive_prefix,
-                     json.dumps({"state_topic": "%s/state" % prefix,
-                                 "name": "%s Online" % conf.discovery_node}))
+        loop.publish_raw(alive_prefix,
+                         json.dumps({"state_topic": "%s/state" % prefix,
+                                     "name": "%s Online" % conf.discovery_node}))
 
 
 class DiscoveryEvent(RepeatingEvent):
@@ -35,6 +39,9 @@ class DiscoveryEvent(RepeatingEvent):
 
 
 if __name__ == "__main__":
+    register_sensor_type("bme280", BME280Sensor)
+    register_sensor_type("am2320", AM2320Sensor)
+
     conf = Configuration()
     conf.parse_args()
 
@@ -42,8 +49,14 @@ if __name__ == "__main__":
 
     if conf.alive_interval > 0:
         loop.schedule(RepeatingEvent(NOW, conf.alive_interval, send_alive,
-                                     (loop, conf.prefix + "/state")))
+                                     loop))
     if conf.discoverable:
         loop.schedule(DiscoveryEvent(conf))
+
+    for desc in conf.sensors:
+        print("configuring %s" % desc)
+        s = create_sensor(desc)
+        s.set_loop(loop)
+        loop.schedule(s.event())
 
     loop.loop()

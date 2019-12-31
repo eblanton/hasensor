@@ -67,8 +67,13 @@ class Loop:
         """Add an event to the loop's schedule."""
         heappush(self._events, event)
 
-    def publish(self, topic, data):
-        """Publish a message to the loop's MQTT broker."""
+    def publish(self, subtopic, data):
+        """Publish a message to the loop's MQTT broker under this sensor's topic."""
+        topic = self._conf.prefix + "/" + subtopic
+        self._mqttclient.publish(topic, data)
+
+    def publish_raw(self, topic, data):
+        """Publish a message to the loop's MQTT broker on any topic."""
         self._mqttclient.publish(topic, data)
 
     def _process(self, event: 'Event'):
