@@ -13,7 +13,6 @@ from hasensor.sensors.am2320 import AM2320Sensor
 
 
 def send_alive(loop: Optional[Loop]) -> None:
-    print("Sending keepalive")
     if loop is None:
         return
     loop.publish("state", "ON")
@@ -54,7 +53,6 @@ if __name__ == "__main__":
         loop.schedule(DiscoveryEvent(conf))
 
     for desc in conf.sensors:
-        print("configuring %s" % desc)
         s = create_sensor(desc)
         s.set_loop(loop)
         loop.schedule(s.event())
