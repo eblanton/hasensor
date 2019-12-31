@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 def _on_connect_cb(client, data, flags, result):
     data._on_connect_cb(client, flags, result)
 
+def _on_disconnect_cb(client, data, result):
+    data._on_disconnect_cb(client, result)
 
 class Loop:
     """The main event loop.
@@ -44,6 +46,7 @@ class Loop:
         # Create the MQTT client
         self._mqttclient = MQTTClient.Client(conf.client_id, userdata=self)
         self._mqttclient.on_connect = _on_connect_cb
+        self._mqttclient.on_disconnect = _on_disconnect_cb
 
         self.prefix = self._conf.prefix
 
@@ -62,6 +65,10 @@ class Loop:
             self.connected = True
         else:
             raise Exception("connection error")
+
+    def _on_disconnect_cb(self, client: MQTTClient.Client, result):
+        self.connected = False
+        self._mqttclient.reconnect()
 
     def schedule(self, event: 'Event'):
         """Add an event to the loop's schedule."""
