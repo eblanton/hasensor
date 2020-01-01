@@ -8,8 +8,14 @@ from hasensor.loop import Loop
 from hasensor.event import RepeatingEvent, NOW
 
 from hasensor.registry import register_sensor_type, create_sensor
-from hasensor.sensors.bme280 import BME280Sensor
-from hasensor.sensors.am2320 import AM2320Sensor
+try:
+    from hasensor.sensors.bme280 import BME280Sensor
+    from hasensor.sensors.am2320 import AM2320Sensor
+    _have_board = True
+except:
+    BME280Sensor = None
+    AM2320Sensor = None
+    _have_board = False
 
 
 def send_alive(loop: Optional[Loop]) -> None:
@@ -38,8 +44,9 @@ class DiscoveryEvent(RepeatingEvent):
 
 
 if __name__ == "__main__":
-    register_sensor_type("bme280", BME280Sensor)
-    register_sensor_type("am2320", AM2320Sensor)
+    if _have_board:
+        register_sensor_type("bme280", BME280Sensor)
+        register_sensor_type("am2320", AM2320Sensor)
 
     conf = Configuration()
     conf.parse_args()
