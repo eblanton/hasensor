@@ -8,12 +8,10 @@ from typing import Any, Callable, Dict, Optional, TypeVar, Type, Union
 from .event import Event, RepeatingEvent, NOW
 from .loop import Loop
 
-SensorType = TypeVar('SensorType', bound='Sensor')
-
 ArgDict = Dict[str, Union[Type, Callable[[str], Any]]]
 
 
-def _sensor_callback(sensor: Optional[SensorType]) -> None:
+def _sensor_callback(sensor: Optional['Sensor']) -> None:
     if sensor is not None:
         sensor.fire()
 

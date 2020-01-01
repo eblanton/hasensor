@@ -11,7 +11,11 @@ class AM2320Sensor(Sensor):
     }
 
     def __init__(self, address: int = 0x5c, **kwargs):
-        self.__class__.__base__.type_args(kwargs)
+        # This next expression resolves the parent class of AM2320Sensor,
+        # which is Sensor (but may not always be), then calls type_args()
+        # on it -- which is defined on Sensor, but is class-aware.  For
+        # some reason uknown as yet to me, mypy doesn't like that.
+        self.__class__.__base__.type_args(kwargs)       # type: ignore
         super().__init__(**kwargs)
 
         i2c = busio.I2C(board.SCL, board.SDA)

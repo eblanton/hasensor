@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 from hasensor.configuration import Configuration
 from hasensor.loop import Loop
 from hasensor.event import RepeatingEvent, NOW
+from hasensor.sensor import Sensor
 
 from hasensor.registry import register_sensor_type, create_sensor
 try:
@@ -13,8 +14,6 @@ try:
     from hasensor.sensors.am2320 import AM2320Sensor
     _have_board = True
 except:
-    BME280Sensor = None
-    AM2320Sensor = None
     _have_board = False
 
 
@@ -59,7 +58,7 @@ if __name__ == "__main__":
         loop.schedule(DiscoveryEvent(conf))
 
     for desc in conf.sensors:
-        s = create_sensor(desc)
+        s: Sensor = create_sensor(desc)
         s.set_loop(loop)
         loop.schedule(s.event())
 

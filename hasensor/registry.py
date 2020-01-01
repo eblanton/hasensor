@@ -1,15 +1,11 @@
-from typing import Dict, Optional, TypeVar, Type
+from typing import Any, Dict, Optional, Type
 
 from .sensor import Sensor
 
-SensorType = TypeVar('SensorType', bound=Sensor)
-"""Any type derived from Sensor."""
-
-# For some reason I cannot make this type checking work.
-_sensor_registry = {}                   # type: ignore
+_sensor_registry = {}                   # type: Dict[str, Type[Sensor]]
 
 
-def register_sensor_type(name: str, sensor: Type[SensorType]) -> None:
+def register_sensor_type(name: str, sensor: Type[Sensor]) -> None:
     """Register a sensor type for later creation.
 
     The name is the name of the sensor as you would describe it in a
@@ -21,7 +17,7 @@ def register_sensor_type(name: str, sensor: Type[SensorType]) -> None:
     _sensor_registry[name] = sensor
 
 
-def create_sensor(desc: str) -> SensorType:
+def create_sensor(desc: str) -> Sensor:
     """Create a sensor from a description string.
 
     The description string is of the form:
@@ -35,7 +31,7 @@ def create_sensor(desc: str) -> SensorType:
     """
     name, *args = desc.split(':')
 
-    kwargs: Dict[str, Optional[str]] = {}
+    kwargs: Dict[str, Optional[Any]] = {}
     for arg in args:
         key, *val = arg.split('=', 1)
         if val:
@@ -49,4 +45,5 @@ def create_sensor(desc: str) -> SensorType:
     sensorcls = _sensor_registry[name]
     sensorcls.type_args(kwargs)
 
-    return _sensor_registry[name](**kwargs)
+    # mypy doesn't like this
+    return _sensor_registry[name](**kwargs)     # type: ignore
