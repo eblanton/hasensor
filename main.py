@@ -8,6 +8,7 @@ from hasensor.event import RepeatingEvent, NOW
 from hasensor.sensor import Sensor
 
 from hasensor.registry import register_sensor_type, create_sensor
+from hasensor.sensors.system import SystemSensor
 try:
     from hasensor.sensors.bme280 import BME280Sensor
     from hasensor.sensors.am2320 import AM2320Sensor
@@ -41,6 +42,7 @@ class DiscoveryEvent(RepeatingEvent):
 
 
 if __name__ == "__main__":
+    register_sensor_type("system", SystemSensor)
     if _have_board:
         register_sensor_type("bme280", BME280Sensor)
         register_sensor_type("am2320", AM2320Sensor)
