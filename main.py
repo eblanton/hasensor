@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import json
+import sys
 from typing import Optional, Tuple
 
 from hasensor.configuration import Configuration
@@ -29,9 +29,8 @@ def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
     prefix = conf.prefix
     if conf.alive_interval != 0:
         alive_prefix = "%s/binary_sensor/%sOnline/config" % (disc_prefix, conf.discovery_node)
-        loop.publish_raw(alive_prefix,
-                         json.dumps({"state_topic": "%s/state" % prefix,
-                                     "name": "%s Online" % conf.discovery_node}))
+        loop.publish_raw(alive_prefix, '{"state_topic":"%s/state","name":"%s Online"}' %
+                         (prefix, conf.discovery_node))
 
 
 class DiscoveryEvent(RepeatingEvent):
