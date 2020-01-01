@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import sys
 from typing import Optional, Tuple
 
 from hasensor.configuration import Configuration
@@ -13,7 +12,7 @@ try:
     from hasensor.sensors.bme280 import BME280Sensor
     from hasensor.sensors.am2320 import AM2320Sensor
     _have_board = True
-except:
+except NotImplementedError:
     _have_board = False
 
 

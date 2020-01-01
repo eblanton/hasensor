@@ -8,7 +8,7 @@ prefix used by the node to the description of its sensors.
 import argparse
 import socket
 
-from typing import Tuple
+from typing import Tuple, List
 
 
 def _parse_broker(broker: str) -> Tuple[str, int]:

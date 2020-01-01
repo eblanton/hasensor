@@ -3,7 +3,7 @@
 New sensors should derive from Sensor, and may wish to use some of the
 helper functions provided here.
 """
-from typing import Any, Callable, Dict, Optional, TypeVar, Type, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 
 from .event import Event, RepeatingEvent, NOW
 from .loop import Loop
