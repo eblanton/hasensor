@@ -45,5 +45,9 @@ def create_sensor(desc: str) -> Sensor:
     sensorcls = _sensor_registry[name]
     sensorcls.type_args(kwargs)
 
-    # mypy doesn't like this
+    # Making this type check requires making the argument types for
+    # the defaulted arguments of Sensor optional types, which in turn
+    # causes more pain; meanwhile, we don't even know that we're
+    # calling this on Sensor itself (it could be a subclass).  I don't
+    # know how to express this to Python typing.
     return _sensor_registry[name](**kwargs)     # type: ignore

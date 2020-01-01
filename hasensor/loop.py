@@ -8,7 +8,7 @@ It does not currently handle reconnection logic, but it should.
 """
 
 import time
-from typing import List, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from heapq import heappush, heappop
 
 import paho.mqtt.client as MQTTClient
@@ -19,11 +19,12 @@ if TYPE_CHECKING:
     from .event import Event
 
 
-def _on_connect_cb(client, data, flags, result):
+def _on_connect_cb(client: MQTTClient.Client, data: Any, flags: Dict[str, int],
+                   result: int) -> None:
     data._on_connect_cb(client, flags, result)
 
 
-def _on_disconnect_cb(client, data, result):
+def _on_disconnect_cb(client: MQTTClient.Client, data: Any, result: int) -> None:
     data._on_disconnect_cb(client, result)
 
 
@@ -61,43 +62,43 @@ class Loop:
         This value should only be queried, not set, by external users.
         """
 
-    def _on_connect_cb(self, client: MQTTClient.Client, flags,
+    def _on_connect_cb(self, client: MQTTClient.Client, flags: Dict[str, int],
                        result: int) -> None:
         if result == 0:
             self.connected = True
         else:
             raise Exception("connection error")
 
-    def _on_disconnect_cb(self, client: MQTTClient.Client, result):
+    def _on_disconnect_cb(self, client: MQTTClient.Client, result: int) -> None:
         self.connected = False
         self._mqttclient.reconnect()
 
-    def schedule(self, event: 'Event'):
+    def schedule(self, event: 'Event') -> None:
         """Add an event to the loop's schedule."""
         heappush(self._events, event)
 
-    def publish(self, subtopic, data):
+    def publish(self, subtopic: str, data: str) -> None:
         """Publish a message to the loop's MQTT broker under this sensor's topic."""
         topic = self._conf.prefix + "/" + subtopic
         self._mqttclient.publish(topic, data)
 
-    def publish_raw(self, topic, data):
+    def publish_raw(self, topic: str, data: str) -> None:
         """Publish a message to the loop's MQTT broker on any topic."""
         self._mqttclient.publish(topic, data)
 
-    def _process(self, event: 'Event'):
+    def _process(self, event: 'Event') -> None:
         event.fire()
         if event.repeats:
             self.schedule(event)
 
-    def loop(self):
+    def loop(self) -> None:
         """Loop forever, running the scheduled events."""
         if not self._events:
             return
 
         # Using a heap for the handful of events with multi-second
         # delays between is almost certainly overkill.
-        nevent = heappop(self._events)
+        nevent: Optional[Event] = heappop(self._events)
         while True:
             if not self.connected:
                 self._mqttclient.loop(timeout=0.5, max_packets=1)
@@ -105,6 +106,9 @@ class Loop:
 
             now = time.time()
 
+            # nevent is not None here, but mypy doesn't know that
+            if nevent is None:
+                break
             # Process all events that happened up to and including now
             while nevent.next_fire <= now:
                 self._process(nevent)

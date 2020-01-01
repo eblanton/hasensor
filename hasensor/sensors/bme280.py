@@ -1,3 +1,5 @@
+from typing import Optional
+
 import board
 import busio
 import adafruit_bme280
@@ -10,7 +12,7 @@ class BME280Sensor(Sensor):
         "address": hexint_parser
     }
 
-    def __init__(self, address: int = 0x77, **kwargs):
+    def __init__(self, address: Optional[int] = 0x77, **kwargs):
         self.__class__.__base__.type_args(kwargs)       # type: ignore
         super().__init__(**kwargs)
 

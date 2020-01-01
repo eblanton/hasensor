@@ -103,7 +103,7 @@ class Configuration:
                             help="Add a sensor description string to the current configuration")
         return parser
 
-    def parse_args(self, filename: str = None):
+    def parse_args(self, filename: str = None) -> None:
         """Parse the command line arguments.
 
         The contents of the command line arguments will be used to configure

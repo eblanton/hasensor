@@ -21,7 +21,7 @@ class Event:
     callback at the scheduled time.
     """
 
-    def __init__(self, t: float, callback: EventCallback = None,
+    def __init__(self, t: float, callback: Optional[EventCallback] = None,
                  data: Any = None):
         """Creates an event that fires at time t.
 
@@ -36,13 +36,13 @@ class Event:
         if t == NOW:
             self.next_fire = time.time()
 
-    def __eq__(self, other):
-        return self.next_fire == other.next_fire
+    def __eq__(self, other: Any) -> bool:
+        return type(other) == type(self) and self.next_fire == other.next_fire
 
-    def __ne__(self, other):
-        return self.next_fire != other.next_fire
+    def __ne__(self, other: Any) -> bool:
+        return type(other) != type(self) or self.next_fire != other.next_fire
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'Event') -> bool:
         return self.next_fire < other.next_fire
 
     def fire(self) -> None:
@@ -62,7 +62,7 @@ class RepeatingEvent(Event):
     """
 
     def __init__(self, t: float, period: float,
-                 callback: EventCallback = None, data: Any = None):
+                 callback: Optional[EventCallback] = None, data: Any = None):
         """Creates a repeating event.
 
         The event will first fire at time t, then every period

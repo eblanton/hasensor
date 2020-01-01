@@ -43,8 +43,8 @@ class Sensor:
         'period': float
     }
 
-    def __init__(self, name: str = "Sensor", start: float = NOW,
-                 period: float = 0.0):
+    def __init__(self, name: Optional[str] = "Sensor",
+                 start: float = NOW, period: float = 0.0):
         """Initialize a new Sensor with a schedule.
 
         keyword arguments:
@@ -59,11 +59,11 @@ class Sensor:
         self._event: Optional[Event] = None
         self._loop: Optional[Loop] = None
 
-    def set_loop(self, loop: Loop):
+    def set_loop(self, loop: Loop) -> None:
         """Set the event loop that this sensor will be scheduled on."""
         self._loop = loop
 
-    def event(self):
+    def event(self) -> Event:
         """Create or retrieve an event that will fire this sensor."""
         if self._event is not None:
             return self._event
@@ -77,12 +77,12 @@ class Sensor:
                                          _sensor_callback, self)
         return self._event
 
-    def fire(self):
+    def fire(self) -> None:
         """The method called by this sensor's event, to be overridden."""
         print("Firing base Sensor event")
 
     @classmethod
-    def type_args(cls, args: Dict[str, Optional[Any]]):
+    def type_args(cls, args: Dict[str, Optional[Any]]) -> None:
         """Give the arguments to this sensor a type.
 
         Sensors are typically created from a description string, which has
