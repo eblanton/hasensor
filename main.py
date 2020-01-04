@@ -9,18 +9,13 @@ from hasensor.sensor import Sensor
 
 from hasensor.registry import register_sensor_type, create_sensor
 from hasensor.sensors.system import SystemSensor
+from hasensor.sensors.announcer import Announcer
 try:
     from hasensor.sensors.bme280 import BME280Sensor
     from hasensor.sensors.am2320 import AM2320Sensor
     _have_board = True
 except NotImplementedError:
     _have_board = False
-
-
-def send_alive(loop: Optional[Loop]) -> None:
-    if loop is None:
-        return
-    loop.publish("state", "ON")
 
 
 def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
@@ -43,6 +38,7 @@ class DiscoveryEvent(RepeatingEvent):
 
 if __name__ == "__main__":
     register_sensor_type("system", SystemSensor)
+    register_sensor_type("announcer", Announcer)
     if _have_board:
         register_sensor_type("bme280", BME280Sensor)
         register_sensor_type("am2320", AM2320Sensor)
@@ -52,9 +48,6 @@ if __name__ == "__main__":
 
     loop = Loop(conf)
 
-    if conf.alive_interval > 0:
-        loop.schedule(RepeatingEvent(NOW, conf.alive_interval, send_alive,
-                                     loop))
     if conf.discoverable:
         loop.schedule(DiscoveryEvent(conf))
 

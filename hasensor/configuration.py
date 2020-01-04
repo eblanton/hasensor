@@ -45,7 +45,6 @@ class Configuration:
     DEF_DISC_PREFIX = "homeassistant"           # type: str
     DEF_DISC_NODE = _hostname                   # type: str
     DEF_DISC_INTERVAL = 60*60                   # type: int
-    DEF_ALIVE_INTERVAL = 0                      # type: int
 
     def __init__(self):
         self.broker: Tuple[str, int] = ("localhost", 1883)
@@ -65,11 +64,6 @@ class Configuration:
 
         A value of 0 will send only one discovery message at sensor startup,
         providing that discovery is enabled.
-        """
-        self.alive_interval: int = Configuration.DEF_ALIVE_INTERVAL
-        """The interval at which liveness messages should be sent.
-
-        A value of 0 will disable liveness messages entirely.
         """
         self.sensors: List[str] = []
 
@@ -96,9 +90,6 @@ class Configuration:
         parser.add_argument("--discovery-node", type=str,
                             default=Configuration.DEF_DISC_NODE,
                             help="Node ID for discovery (omitted if none)")
-        parser.add_argument("--alive-interval", type=int,
-                            default=Configuration.DEF_ALIVE_INTERVAL,
-                            help="Interval for sending liveness messages (seconds; suppress if 0)")
         parser.add_argument("--sensor", "-s", type=str, action="append",
                             help="Add a sensor description string to the current configuration")
         return parser
@@ -128,7 +119,5 @@ class Configuration:
             self.discovery_prefix = args.discovery_prefix
         if args.discovery_interval:
             self.discovery_interval = args.discovery_interval
-        if args.alive_interval:
-            self.alive_interval = args.alive_interval
         if args.sensor:
             self.sensors = args.sensor
