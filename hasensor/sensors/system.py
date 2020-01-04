@@ -30,10 +30,10 @@ class SystemSensor(Sensor):
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
             temp = int(f.read())
         f_temp = float(temp) / 1000.0
-        stats["cpu_temp"] = "%0.1f" % f_temp
+        stats["cpu_temp"] = round(f_temp, 1)
 
-        stats["cpu_pct"] = "%0.1f" % psutil.cpu_percent()
-        stats["mem_used_pct"] = "%0.1f" % psutil.virtual_memory().percent
+        stats["cpu_pct"] = round(psutil.cpu_percent(), 1)
+        stats["mem_used_pct"] = round(psutil.virtual_memory().percent, 1)
 
         if self._diskthresh != 0.0:
             warnings: List[str] = []
