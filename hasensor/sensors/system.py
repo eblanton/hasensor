@@ -14,7 +14,6 @@ class SystemSensor(Sensor):
 
     def __init__(self, partitions: str = "", diskthresh: float = 0.0,
                  **kwargs):
-        self.__class__.__base__.type_args(kwargs)       # type: ignore
         super().__init__(**kwargs)
 
         if partitions:

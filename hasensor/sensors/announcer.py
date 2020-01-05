@@ -7,7 +7,6 @@ class Announcer(Sensor):
     }
 
     def __init__(self, value: str = "ON", **kwargs):
-        self.__class__.__base__.type_args(kwargs)       # type: ignore
         super().__init__(**kwargs)
 
         self._value = value

@@ -13,7 +13,6 @@ class BME280Sensor(Sensor):
     }
 
     def __init__(self, address: Optional[int] = 0x77, **kwargs):
-        self.__class__.__base__.type_args(kwargs)       # type: ignore
         super().__init__(**kwargs)
 
         i2c = busio.I2C(board.SCL, board.SDA)

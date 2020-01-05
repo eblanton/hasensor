@@ -3,7 +3,7 @@
 New sensors should derive from Sensor, and may wish to use some of the
 helper functions provided here.
 """
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from .event import Event, RepeatingEvent, NOW
 from .loop import Loop
@@ -28,6 +28,40 @@ def time_parser(arg: str) -> float:
     if arg == "NOW":
         return NOW
     return float(arg)
+
+
+def type_args(cls: Type['Sensor'], kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    """Return a dict of typed arguments for a sensor.
+
+    Sensors are typically created from a description string, which has
+    only string arguments.  This method walks the class hierarchy for a given
+    Sensor type and types the arguments for each level.
+
+    This function should be called on the arguments split out of a description
+    string before passing it to a sensor.
+    """
+    args = kwargs
+    typed: Dict[str, Any] = {}
+    while cls is not object:
+        done: List[str] = []
+        for arg, value in args.items():
+            if arg in cls._argtypes:
+                done.append(arg)
+                if value is not None:
+                    typed[arg] = cls._argtypes[arg](value)
+                elif cls._argtypes[arg] is bool:
+                    typed[arg] = False
+                else:
+                    raise Exception("missing argument where required")
+        for arg in done:
+            del args[arg]
+        cls = cls.__base__
+
+    if args:
+        # Python uses TypeError for unrecognized keyword arguments
+        raise TypeError("Unexpected keyword arguments: %s" % (", ".join(args)))
+
+    return typed
 
 
 class Sensor:
@@ -80,35 +114,3 @@ class Sensor:
     def fire(self) -> None:
         """The method called by this sensor's event, to be overridden."""
         print("Firing base Sensor event")
-
-    @classmethod
-    def type_args(cls, args: Dict[str, Optional[Any]]) -> None:
-        """Give the arguments to this sensor a type.
-
-        Sensors are typically created from a description string, which has
-        only string arguments.  This method allows each level of the sensor
-        class hierarchy to define its arguments with a type, parse the string
-        arguments into their types, and then pass the typed arguments to
-        super().__init__().
-
-        Subclasses of Sensor should call something like
-        self.__class__.__base__.type_args(kwargs) on the keyword arguments
-        they do not recognize, then pass the result to super().__init__().
-        This will leave any arguments unrecognized by the parent class as
-        strings to be recursively typed by that initializer.  The type_args()
-        function for Sensor itself will throw an exception on arguments it does
-        not recognize.
-        """
-        for k in args.keys():
-            if k in cls._argtypes:
-                v = args[k]             # Required to appease the type checker
-                if v is not None:
-                    args[k] = cls._argtypes[k](v)
-                elif cls._argtypes[k] is bool:
-                    args[k] = False
-                else:
-                    raise Exception("Missing argument where required")
-
-            elif cls.__class__ is Sensor:
-                # Python uses TypeError for unrecognized keyword arguments
-                raise TypeError("Unexpected keyword argument '%s'" % k)

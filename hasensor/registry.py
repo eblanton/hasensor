@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Type
 
-from .sensor import Sensor
+from .sensor import Sensor, type_args
 
 _sensor_registry = {}                   # type: Dict[str, Type[Sensor]]
 
@@ -43,7 +43,7 @@ def create_sensor(desc: str) -> Sensor:
         raise Exception("unknown sensor %s" % name)
 
     sensorcls = _sensor_registry[name]
-    sensorcls.type_args(kwargs)
+    kwargs = type_args(sensorcls, kwargs)
 
     # Making this type check requires making the argument types for
     # the defaulted arguments of Sensor optional types, which in turn
