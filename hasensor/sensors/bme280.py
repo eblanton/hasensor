@@ -23,5 +23,5 @@ class BME280Sensor(Sensor):
         humidity = self._bme280.humidity
         pressure = self._bme280.pressure
         self._loop.publish(self.name,
-                           '{"temp":%.02f,"humidity":%.02f,"pressure":%.02f}'
+                           '{"temp":%.01f,"humidity":%.01f,"pressure":%.02f}'
                            % (temp, humidity, pressure))
