@@ -21,7 +21,7 @@ except NotImplementedError:
 def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
     disc_prefix = conf.discovery_prefix
     prefix = conf.prefix
-    if conf.alive_interval != 0:
+    if conf.discovery_interval != 0:
         alive_prefix = "%s/binary_sensor/%sOnline/config" % (disc_prefix, conf.discovery_node)
         loop.publish_raw(alive_prefix, '{"state_topic":"%s/state","name":"%s Online"}' %
                          (prefix, conf.discovery_node))
