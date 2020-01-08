@@ -18,6 +18,8 @@ from .configuration import Configuration
 if TYPE_CHECKING:
     from .event import Event
 
+_MAX_LOOP = 15.0
+
 
 def _on_connect_cb(client: MQTTClient.Client, data: Any, flags: Dict[str, int],
                    result: int) -> None:
@@ -122,4 +124,6 @@ class Loop:
 
             # Calculate the difference between now and the next event
             stime = nevent.next_fire - now
+            if stime > _MAX_LOOP:
+                stime = _MAX_LOOP
             self._mqttclient.loop(timeout=stime)
