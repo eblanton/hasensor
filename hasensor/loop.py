@@ -53,16 +53,17 @@ class Loop:
         self._mqttclient.on_connect = _on_connect_cb
         self._mqttclient.on_disconnect = _on_disconnect_cb
 
-        self.prefix = self._conf.prefix
-
         self._events: List['Event'] = []
-        self._mqttclient.connect(self._conf.broker[0], self._conf.broker[1])
+        self._conn_pending = True
 
+        self.prefix = self._conf.prefix
         self.connected: bool = False
         """Whether the loop believes it is connected to the server or not.
 
         This value should only be queried, not set, by external users.
         """
+
+        self._mqttclient.connect(self._conf.broker[0], self._conf.broker[1])
 
     def _on_connect_cb(self, client: MQTTClient.Client, flags: Dict[str, int],
                        result: int) -> None:
@@ -73,7 +74,14 @@ class Loop:
 
     def _on_disconnect_cb(self, client: MQTTClient.Client, result: int) -> None:
         self.connected = False
-        self._mqttclient.reconnect()
+        self._try_reconnect()
+
+    def _try_reconnect(self) -> None:
+        self._conn_pending = True
+        try:
+            self._mqttclient.reconnect()
+        except OSError:
+            self._conn_pending = False
 
     def schedule(self, event: 'Event') -> None:
         """Add an event to the loop's schedule."""
@@ -103,7 +111,10 @@ class Loop:
         nevent: Optional[Event] = heappop(self._events)
         while True:
             if not self.connected:
-                self._mqttclient.loop(timeout=0.5, max_packets=1)
+                if self._conn_pending:
+                    self._mqttclient.loop(timeout=0.5, max_packets=1)
+                else:
+                    self._try_reconnect()
                 continue
 
             now = time.time()
