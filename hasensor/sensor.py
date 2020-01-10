@@ -50,7 +50,7 @@ def type_args(cls: Type['Sensor'], kwargs: Dict[str, Any]) -> Dict[str, Any]:
                 if value is not None:
                     typed[arg] = cls._argtypes[arg](value)
                 elif cls._argtypes[arg] is bool:
-                    typed[arg] = False
+                    typed[arg] = True
                 else:
                     raise Exception("missing argument where required")
         for arg in done:
