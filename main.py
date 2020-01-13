@@ -17,6 +17,11 @@ try:
 except NotImplementedError:
     _have_board = False
 
+try:
+    from hasensor.sensors.rpigpio import RPiGPIOSensor
+    _have_pi = True
+except ModuleNotFoundError:
+    _have_pi = False
 
 def send_discovery(args: Optional[Tuple[Loop, Configuration]]) -> None:
     disc_prefix = conf.discovery_prefix
@@ -42,6 +47,8 @@ if __name__ == "__main__":
     if _have_board:
         register_sensor_type("bme280", BME280Sensor)
         register_sensor_type("am2320", AM2320Sensor)
+    if _have_pi:
+        register_sensor_type("gpio", RPiGPIOSensor)
 
     conf = Configuration()
     conf.parse_args()
