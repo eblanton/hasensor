@@ -1,3 +1,8 @@
+"""Sensor registry.
+
+Sensors should be added to the registry using register_sensor_type(), and then
+created with create_sensor() using a sensor description string.
+"""
 from typing import Any, Dict, Optional, Type
 
 from .sensor import Sensor, type_args

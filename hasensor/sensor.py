@@ -113,4 +113,4 @@ class Sensor:
 
     def fire(self) -> None:
         """The method called by this sensor's event, to be overridden."""
-        print("Firing base Sensor event")
+        print("Firing base Sensor event for %s", self.name)

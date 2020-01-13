@@ -21,6 +21,14 @@ class Event:
     callback at the scheduled time.
     """
 
+    repeats: bool
+    """True if this event is a repeating event and should be rescheduled."""
+    next_fire: float
+    """The next time at which this event should fire."""
+
+    _callback: Optional[EventCallback]
+    _data: Any
+
     def __init__(self, t: float, callback: Optional[EventCallback] = None,
                  data: Any = None):
         """Creates an event that fires at time t.
@@ -28,27 +36,28 @@ class Event:
         The callback will be called with data as an argument
         at time t.
         """
-        self.repeats: bool = False
-        self.next_fire: float = t
-        self.callback: Optional[EventCallback] = callback
-        self.data: Any = data
+        self.repeats = False
+        self.next_fire = t
+        self._callback = callback
+        self._data = data
 
         if t == NOW:
             self.next_fire = time.time()
 
     def __eq__(self, other: Any) -> bool:
-        return type(other) == type(self) and self.next_fire == other.next_fire
+        return other.instanceof(self.__class__) \
+            and self.next_fire == other.next_fire
 
     def __ne__(self, other: Any) -> bool:
-        return type(other) != type(self) or self.next_fire != other.next_fire
+        return other.instanceof(self.__class__) or self.next_fire != other.next_fire
 
     def __lt__(self, other: 'Event') -> bool:
         return self.next_fire < other.next_fire
 
     def fire(self) -> None:
         """Execute this event's callback with its given data."""
-        if self.callback is not None:
-            self.callback(self.data)
+        if self._callback is not None:
+            self._callback(self._data)
 
     def reschedule(self, loop: Loop) -> None:
         """Reschedule this event on the given loop (no-op)."""
