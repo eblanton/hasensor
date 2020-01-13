@@ -8,7 +8,7 @@ It does not currently handle reconnection logic, but it should.
 """
 
 import time
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 from heapq import heappush, heappop
 
 import paho.mqtt.client as MQTTClient
@@ -19,15 +19,6 @@ if TYPE_CHECKING:
     from .event import Event
 
 _MAX_LOOP = 15.0
-
-
-def _on_connect_cb(client: MQTTClient.Client, data: Any, flags: Dict[str, int],
-                   result: int) -> None:
-    data._on_connect_cb(client, flags, result)
-
-
-def _on_disconnect_cb(client: MQTTClient.Client, data: Any, result: int) -> None:
-    data._on_disconnect_cb(client, result)
 
 
 class Loop:
@@ -50,8 +41,10 @@ class Loop:
 
         # Create the MQTT client
         self._mqttclient = MQTTClient.Client(conf.client_id, userdata=self)
-        self._mqttclient.on_connect = _on_connect_cb
-        self._mqttclient.on_disconnect = _on_disconnect_cb
+        self._mqttclient.on_connect = lambda client, data, flags, result: \
+            self._on_connect_cb(client, flags, result)
+        self._mqttclient.on_disconnect = lambda client, data, result: \
+            self._on_disconnect_cb(client, result)
 
         self._events: List['Event'] = []
         self._conn_pending = True
