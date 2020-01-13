@@ -8,6 +8,7 @@ prefix used by the node to the description of its sensors.
 import argparse
 import socket
 
+from dataclasses import dataclass
 from typing import Tuple, List
 
 
@@ -32,6 +33,7 @@ def _parse_broker(broker: str) -> Tuple[str, int]:
     raise Exception(errmsg)
 
 
+@dataclass
 class Configuration:
     """Configuration for a sensor node.
 
@@ -39,6 +41,9 @@ class Configuration:
     calling parse_args with no arguments, filling the configuration in from
     the command line.
     """
+
+    # pylint: disable=too-many-instance-attributes
+
     _hostname = socket.gethostname()            # type: str
     DEF_MQTT_CLIENT_ID = ("sensor_%s" % _hostname)  # type: str
     DEF_MQTT_PREFIX = DEF_MQTT_CLIENT_ID        # type: str
@@ -46,26 +51,35 @@ class Configuration:
     DEF_DISC_NODE = _hostname                   # type: str
     DEF_DISC_INTERVAL = 60*60                   # type: int
 
-    def __init__(self):
-        self.broker: Tuple[str, int] = ("localhost", 1883)
-        """The MQTT broker (hostname, port) tuple"""
-        self.discoverable: bool = False
-        """Whether the sensors on this node should be discoverable by Home Assistant"""
-        self.client_id: str = Configuration.DEF_MQTT_CLIENT_ID
-        """The client ID used for connecting to the MQTT broker"""
-        self.prefix: str = Configuration.DEF_MQTT_PREFIX
-        """The MQTT topic prefix used by this sensor node"""
-        self.discovery_prefix: str = Configuration.DEF_DISC_PREFIX
-        """The discovery topic prefix used for Home Assistant discovery"""
-        self.discovery_node: str = Configuration.DEF_DISC_NODE
-        """The discovery node ID"""
-        self.discovery_interval: int = Configuration.DEF_DISC_INTERVAL
-        """The interval at which repeated discovery messages should be sent.
+    broker: Tuple[str, int]
+    """The MQTT broker (hostname, port) tuple"""
+    discoverable: bool
+    """Whether the sensors on this node should be discoverable by Home Assistant"""
+    client_id: str
+    """The client ID used for connecting to the MQTT broker"""
+    prefix: str
+    """The MQTT topic prefix used by this sensor node"""
+    discovery_prefix: str
+    """The discovery topic prefix used for Home Assistant discovery"""
+    discovery_node: str
+    """The discovery node ID"""
+    discovery_interval: int
+    """The interval at which repeated discovery messages should be sent.
 
-        A value of 0 will send only one discovery message at sensor startup,
-        providing that discovery is enabled.
-        """
-        self.sensors: List[str] = []
+    A value of 0 will send only one discovery message at sensor startup,
+    providing that discovery is enabled.
+    """
+    sensors: List[str]
+
+    def __init__(self):
+        self.broker = ("localhost", 1883)
+        self.discoverable = False
+        self.client_id = Configuration.DEF_MQTT_CLIENT_ID
+        self.prefix = Configuration.DEF_MQTT_PREFIX
+        self.discovery_prefix = Configuration.DEF_DISC_PREFIX
+        self.discovery_node = Configuration.DEF_DISC_NODE
+        self.discovery_interval = Configuration.DEF_DISC_INTERVAL
+        self.sensors = []
 
     @classmethod
     def _parser(cls) -> argparse.ArgumentParser:
